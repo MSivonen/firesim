@@ -1,11 +1,15 @@
 let balls = [], //array for particles
-    maxTemp = 8,
-    minTemp = 1,
-    tempDecay = 0.022, //how fast temperature drops over time
-    tempConductionSpeed = 5, //temp conduction between particles
-    tempGravityMult = 1.8, //how much temp affects weight of particles (not mass)
-    sparkTemp = 4.65, //particles near this temperature will be brighter
-    blurAmount = 6;
+maxTemp = 7,
+minTemp = 0.5,
+tempDecay = 0.044,//how fast temperature drops over time
+tempConductionSpeed = 3.2,//temp conduction between particles
+tempGravityMult  = 2.1,//how much temp affects weight of particles (not mass)
+blurAmount  = 10.6,
+heatWidth  = 0.76,
+heatAmount = 0.194,
+sparkTemp = 6.15,//particles near this temperature will be brighter
+blurOn = "Blur on";
+
 const cos = Math.cos,
     sin = Math.sin,
     gravity = 0.08,
@@ -49,7 +53,7 @@ function setup() {
 
 async function draw() {
     drawingContext.shadowBlur = 0;
-    background('rgba(0,0,0,.15)');
+    background('rgba(0,0,0,.05)');
 
     if (debug) {
         updateSliders();
@@ -63,7 +67,8 @@ async function draw() {
     balls.forEach(ball => {
         ball.draw();
     });
-
+    fill(255, 0, 0, 100);
+    rect((width / 2), height + 8, width * (1 - heatWidth), 30, 15);
 }
 
 function makeSliders() {
@@ -81,7 +86,7 @@ function makeSliders() {
     minTempSlider.position(20, sliderpos += 25);
     minTempSlider.style("width", "200px");
 
-    let tempDecaySliderp = createP("Temp decay");
+    let tempDecaySliderp = createP("Temperature decay");
     tempDecaySliderp.position(250, sliderpos + 9);
     tempDecaySlider = createSlider(0.01, 0.2, tempDecay, 0.002);
     tempDecaySlider.position(20, sliderpos += 25);
@@ -99,17 +104,53 @@ function makeSliders() {
     tempGravityMultSlider.position(20, sliderpos += 25);
     tempGravityMultSlider.style("width", "200px");
 
+    let sparksSliderp = createP("Spark temp");
+    sparksSliderp.position(250, sliderpos + 9);
+    sparksSlider = createSlider(minTemp, maxTemp, sparkTemp, 0.05);
+    sparksSlider.position(20, sliderpos += 25);
+    sparksSlider.style("width", "200px");
+
+    let heatWidthSliderp = createP("Heater width");
+    heatWidthSliderp.position(250, sliderpos + 9);
+    heatWidthSlider = createSlider(-1, -.05, -heatWidth, 0.01);
+    heatWidthSlider.position(20, sliderpos += 25);
+    heatWidthSlider.style("width", "200px");
+
+    let heatAmountSliderp = createP("Heater power");
+    heatAmountSliderp.position(250, sliderpos + 9);
+    heatAmountSlider = createSlider(0.005, 1, heatAmount, 0.001);
+    heatAmountSlider.position(20, sliderpos += 25);
+    heatAmountSlider.style("width", "200px");
+
     let blurAmountSliderp = createP("Blur amount");
     blurAmountSliderp.position(250, sliderpos + 9);
     blurAmountSlider = createSlider(0.1, 20, blurAmount, 0.1);
     blurAmountSlider.position(20, sliderpos += 25);
     blurAmountSlider.style("width", "200px");
 
-    let sparksSliderp = createP("Spark temp");
-    sparksSliderp.position(250, sliderpos + 9);
-    sparksSlider = createSlider(minTemp, maxTemp, sparkTemp, 0.05);
-    sparksSlider.position(20, sliderpos += 25);
-    sparksSlider.style("width", "200px");
+    blurRadio = createRadio();
+    blurRadio.option("Blur on");
+    blurRadio.option("Blur off");
+    blurRadio.selected(blurOn);
+    blurRadio.position(20, sliderpos += 25);
+
+    saveButton = createButton("Output settings to log");
+    saveButton.position(20, sliderpos += 25);
+    saveButton.mousePressed(saveSettings);
+}
+
+function saveSettings() {
+    console.log(
+        "maxTemp = " + maxTemp + ",\n" +
+        "minTemp = " + minTemp + ",\n" +
+        "tempDecay = " + tempDecay + ",//how fast temperature drops over time\n" +
+        "tempConductionSpeed = " + tempConductionSpeed + ",//temp conduction between particles\n" +
+        "tempGravityMult  = " + tempGravityMult + ",//how much temp affects weight of particles (not mass)\n" +
+        "blurAmount  = " + blurAmount + ",\n" +
+        "heatWidth  = " + heatWidth + ",\n" +
+        "heatAmount = " + heatAmount + ",\n" +
+        "sparkTemp = " + sparkTemp + ",//particles near this temperature will be brighter\n" +
+        "blurOn = \"" + blurOn + "\";");
 }
 
 function updateSliders() {
@@ -122,6 +163,9 @@ function updateSliders() {
     tempGravityMult = tempGravityMultSlider.value();
     blurAmount = blurAmountSlider.value();
     sparkTemp = sparksSlider.value();
+    heatAmount = heatAmountSlider.value();
+    heatWidth = -heatWidthSlider.value();
+    blurOn = blurRadio.value();
 
     stroke(255);
     let tempY = 5;
@@ -130,8 +174,10 @@ function updateSliders() {
     text("TempDecay: " + tempDecay, 10, tempY += 10);
     text("TempCondunction: " + tempConductionSpeed, 10, tempY += 10);
     text("Temp gravity mult: " + tempGravityMult, 10, tempY += 10);
-    text("Blur amount: " + blurAmount, 10, tempY += 10);
     text("Spark temp: " + sparkTemp, 10, tempY += 10);
+    text(`Heater width: ${(1 - heatWidth).toFixed(2)}`, 10, tempY += 10);
+    text("Heater power: " + heatAmount, 10, tempY += 10);
+    text("Blur amount: " + blurAmount, 10, tempY += 10);
 }
 
 function testBalls() {
@@ -173,11 +219,13 @@ class Ball {
             this.col[1] += 50;
         }
         fill(...this.col);
-        // drawingContext.shadowBlur = blurAmount;
-        // drawingContext.shadowColor = color(...this.col);
-        let rotAmount = this.vel.heading();
-        rect(this.pos.x, this.pos.y, Math.min(this.r * 3, this.r * 3 / this.vel.mag()), //width
-            Math.min(this.r * 3, this.r * 3 * this.vel.mag())); //length
+        if (blurOn == "Blur on") {
+            drawingContext.shadowBlur = blurAmount;
+            drawingContext.shadowColor = color(...this.col);
+        }
+        rect(this.pos.x, this.pos.y,
+            Math.min(this.r * 2, this.r * 2 * this.vel.mag()), //width
+            Math.min(this.r * 2, this.r * 2 * this.vel.mag())); //length
 
     }
 
@@ -221,7 +269,7 @@ class Ball {
 
     temperature() {
         if (this.pos.y > height - this.r - 10) { //hotspot in the center of the floor
-            this.temp += map(Math.abs(this.pos.x - width / 2), width / 2, 0, 0, 0.06);;
+            this.temp += map(Math.abs((this.pos.x - width / 2)) * heatWidth, width / 8, 0, 0, heatAmount);
         }
         else this.temp -= tempDecay * Math.random();
         if (this.temp < minTemp || this.temp == 0) { //avoid div/0

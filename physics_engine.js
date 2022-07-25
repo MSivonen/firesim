@@ -8,7 +8,7 @@ blurAmount  = 10.6,
 heatWidth  = 0.76,
 heatAmount = 0.194,
 sparkTemp = 6.15,//particles near this temperature will be brighter
-blurOn = "Blur on";
+blurOn = "Blur off";
 
 const cos = Math.cos,
     sin = Math.sin,

@@ -12,8 +12,8 @@ let balls = [], //array for particles
     tempGravityMult  = 0.8,//how much temp affects weight of particles (not mass)
     blurAmount  = 10.6,
     heatWidth  = 0.66,
-    heatAmount = 0.313,
-    sparkTemp = 2.95,//particles near this temperature will be brighter
+    heatAmount = 0.34,
+    sparkTemp = 2.45,//particles near this temperature will be brighter
     blurOn = "Blur off";
 
 let calc = new Vec(0, 0);

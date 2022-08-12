@@ -149,7 +149,7 @@ class Ball {
         let y = b0.y - b1.y;
         // let dist = Math.sqrt(x ** 2 + y ** 2);
         // let angle = Math.atan2(y, x);
-        let angle = calc.atan2(y, x);
+        let angle = Math.atan2(y, x);
         let distX = Math.cos(angle) * r;
         let distY = Math.sin(angle) * r;
         let midPointX = b0.x - Math.cos(angle) * dist / 2;

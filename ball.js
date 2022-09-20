@@ -22,27 +22,38 @@ class Ball {
             this.col[0] += 50 + Math.random() * 20;
             this.col[1] += 50 + Math.random() * 20;
         }
-        ctx.fillStyle = rgbToHex(...this.col);
+        ctx.fillStyle = `rgba(${this.col[0]},${this.col[1]},${this.col[2]},0.6)`;// rgbToHex(...this.col);
         if (blurOn == "Blur on") {
             drawingContext.shadowBlur = blurAmount;
             drawingContext.shadowColor = color(...this.col);
         }
-        ctx.fillRect(this.pos.x - this.r, this.pos.y - this.r, this.r * 2, this.r * 2);
+        let mult = 3 * (this.pos.y + 50) / h;
+        ctx.fillRect(this.pos.x - this.r, this.pos.y - this.r, mult * this.r, mult * this.r);
     }
+
+
 
     updateVel() {
         if (this.vel.mag() > 3) {
             this.vel.normalize();
             this.vel.mult(3);
         }
+        if (this.temp > 1) this.acc.x += wind / this.mass * ((this.temp - 0) / (maxTemp - 0));
+        else this.acc.x -= .2 * wind / this.mass;
         this.acc.y += gravity * this.mass * -(this.temp - tempGravityMult);
         this.vel.add(this.acc);
         this.vel.mult(friction);
         this.pos.add(this.vel);
         this.acc.set(0, 0);
         if (this.pos.y > height - this.r) {
-            this.pos.y = height - this.r;
-            this.vel.y *= -1;
+            if (this.temp > maxTemp * .95) {
+                this.pos.y = height - this.r - 15;
+                this.vel.y = -10;
+                this.mass = 10;
+            } else {
+                this.pos.y = height - this.r;
+                this.mass = 1;
+            }
         }
         if (this.pos.y < this.r) {
             this.reset();

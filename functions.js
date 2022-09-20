@@ -20,6 +20,15 @@ function makeBalls(amount) {
     }
 }
 
+function makePixels(w_, h_) {
+    for (let y = 0; y < h_; y++) {
+        pixels.push([]);
+        for (let x = 0; x < w_; x++) {
+            pixels[y].push(new Pixel(x, y, 255 * Math.random()));
+        }
+    }
+}
+
 function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }

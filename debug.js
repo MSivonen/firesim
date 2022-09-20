@@ -3,6 +3,12 @@ let fpsText;
 function makeSliders() {
     let sliderpos = height + 25;
 
+    createP("Wind").position(250, sliderpos + 9);
+    windSlider = createSlider(-0.15, 0.15, wind, 0.01);
+    windSlider.position(20, sliderpos += 25); //notice the += here
+    windSlider.style("width", "200px");
+
+
     createP("Max temp").position(250, sliderpos + 9);
     maxTempSlider = createSlider(1, 20, maxTemp, 0.1);
     maxTempSlider.position(20, sliderpos += 25); //notice the += here
@@ -62,6 +68,7 @@ function makeSliders() {
 
 function saveSettings() {
     console.log(
+        "wind = " + wind + ",\n" +
         "maxTemp = " + maxTemp + ",\n" +
         "minTemp = " + minTemp + ",\n" +
         "tempDecay = " + tempDecay + ",//how fast temperature drops over time\n" +
@@ -75,6 +82,7 @@ function saveSettings() {
 }
 
 function updateSliders() {
+    wind = windSlider.value();
     maxTemp = maxTempSlider.value();
     minTemp = minTempSlider.value();
     tempDecay = tempDecaySlider.value();
